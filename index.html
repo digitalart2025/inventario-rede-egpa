@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Inventário Rede EGPA - 10.102.1.0/24</title>
+<style>
+:root{--bg:#f6f7f9;--surf:#fff;--txt:#1e293b;--mut:#64748b;--line:#e2e8f0;--brand:#0f4c2e;--hover:#f0f7f2;--inp:#fff}
+[data-theme=dark]{--bg:#0f172a;--surf:#1e293b;--txt:#e2e8f0;--mut:#94a3b8;--line:#334155;--brand:#166534;--hover:#273449;--inp:#0f172a}
+*{box-sizing:border-box}
+body{margin:0;font:14px system-ui,Arial,sans-serif;background:var(--bg);color:var(--txt)}
+header{background:var(--surf);border-bottom:1px solid var(--line);padding:12px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:10}
+.logo{width:44px;height:44px;border-radius:10px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800}
+h1{margin:0;font-size:20px;color:var(--brand)}
+header p{margin:2px 0 0;color:var(--mut);font-size:12px}
+.acts{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+button{background:var(--brand);color:#fff;border:0;padding:9px 13px;border-radius:9px;cursor:pointer;font-weight:600;font-size:13px}
+button.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
+button.danger{background:#b91c1c}
+.wrap{max-width:1280px;margin:0 auto;padding:18px}
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px}
+@media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:14px}
+.card b{font-size:26px;display:block}
+.card span{color:var(--mut);font-size:12px}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:#0f7a4a}
+.tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.tabs button{background:var(--surf);color:var(--txt);border:1px solid var(--line)}
+.tabs button.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+.toolbar{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+input,select,textarea{padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:var(--inp);color:var(--txt);font-family:inherit}
+.toolbar input{flex:1;min-width:200px}
+.tw{overflow:auto;border:1px solid var(--line);border-radius:14px;background:var(--surf)}
+table{width:100%;border-collapse:collapse}
+th{background:var(--brand);color:#fff;text-align:left;padding:10px;font-size:12px;position:sticky;top:0;white-space:nowrap}
+td{padding:9px 10px;border-top:1px solid var(--line);font-size:13px;vertical-align:top}
+tr.row{cursor:pointer}
+tr.row:hover td{background:var(--hover)}
+.badge{padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap}
+.s-Ocupado{background:#d1fae5;color:#065f46}
+.s-Livre{background:#e2e8f0;color:#334155}
+.s-A{background:#ffedd5;color:#9a3412}
+[data-theme=dark] .s-Ocupado{background:#14532d;color:#dcfce7}
+[data-theme=dark] .s-Livre{background:#334155;color:#e2e8f0}
+[data-theme=dark] .s-A{background:#7c2d12;color:#ffedd5}
+.muted{color:var(--mut)}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal.open{display:flex}
+.box{background:var(--surf);color:var(--txt);border-radius:16px;padding:20px;width:100%;max-width:580px;max-height:90vh;overflow:auto}
+.box label{display:block;font-size:12px;font-weight:600;margin:10px 0 4px}
+.box input,.box select,.box textarea{width:100%}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+@media(max-width:600px){.grid2{grid-template-columns:1fr}}
+.row-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.err{color:#b91c1c;font-size:12px;min-height:16px;margin-top:6px}
+.foot{color:var(--mut);font-size:12px;text-align:center;padding:16px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">EG</div>
+  <div>
+    <h1>Inventário Rede EGPA</h1>
+    <p>Escola de Governança Pública do Estado do Pará · 10.102.1.0/24 · Gateway .10 · Pool DHCP .120–.252</p>
+  </div>
+  <div class="acts">
+    <button class="ghost" id="themeBtn" title="Alternar tema claro/escuro">Tema</button>
+    <button class="ghost" id="bImp">Importar CSV</button>
+    <button class="ghost" id="bCsv">Exportar CSV</button>
+    <button class="ghost" id="bBak">Backup JSON</button>
+    <button class="danger" id="bRes">Restaurar</button>
+    <input type="file" id="fileIn" accept=".csv,text/csv" hidden>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="cards">
+    <div class="card"><b id="cTot">0</b><span>Total de IPs</span></div>
+    <div class="card"><b id="cOcup">0</b><span>Ocupados</span></div>
+    <div class="card"><b id="cLivre">0</b><span>Livres</span></div>
+    <div class="card"><b id="cIdent">0</b><span>A identificar</span></div>
+    <div class="card"><b id="pctNum">0%</b><span id="pct">ocupado</span><div class="bar"><i id="barOcc" style="width:0%"></i></div></div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button class="active" data-tab="todos">Todos</button>
+    <button data-tab="aps">Roteadores / APs</button>
+    <button data-tab="imp">Impressoras</button>
+    <button data-tab="ident">A identificar</button>
+    <button data-tab="livres">IPs livres</button>
+  </div>
+
+  <div class="toolbar">
+    <input id="q" type="search" placeholder="Buscar por IP, nome, MAC, setor, responsável, patrimônio...">
+    <select id="fStatus">
+      <option value="">Status: todos</option>
+      <option>Ocupado</option><option>Livre</option><option>A identificar</option>
+    </select>
+    <select id="fTipo">
+      <option value="">Tipo: todos</option>
+    </select>
+    <span id="count" class="muted"></span>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr>
+        <th>IP</th><th>Status</th><th>Nome</th><th>Tipo</th><th>MAC</th>
+        <th>Setor / Sala</th><th>Responsável</th><th>Patrimônio</th><th>Atualizado</th><th>Descrição</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+  <p class="foot">Dados iniciais: DHCP Leases + ARP do pfSense (26/11/2026). Edições ficam salvas neste navegador. Faça backup JSON regularmente.</p>
+</div>
+
+<div class="modal" id="modal">
+  <div class="box">
+    <h2 id="mTitle" style="margin:0 0 4px;font-size:18px">Editar IP</h2>
+    <div class="grid2">
+      <div><label>IP</label><input id="f_ip" readonly></div>
+      <div><label>Status</label>
+        <select id="f_status"><option>Ocupado</option><option>Livre</option><option>A identificar</option></select>
+      </div>
+      <div><label>Nome / Hostname</label><input id="f_nome" maxlength="80"></div>
+      <div><label>Tipo</label><select id="f_tipo"></select></div>
+      <div><label>MAC</label><input id="f_mac" placeholder="00:11:22:33:44:55" maxlength="17"></div>
+      <div><label>Setor / Sala</label><input id="f_setor" maxlength="60"></div>
+      <div><label>Responsável</label><input id="f_resp" maxlength="80"></div>
+      <div><label>Patrimônio</label><input id="f_pat" maxlength="40"></div>
+    </div>
+    <label>Descrição</label><input id="f_desc" maxlength="120">
+    <label>Observações</label><textarea id="f_obs" rows="2" maxlength="500"></textarea>
+    <div class="err" id="mErr"></div>
+    <div class="row-btns">
+      <button class="ghost" id="bCancel">Cancelar</button>
+      <button class="danger" id="bLib">Liberar IP</button>
+      <button id="bSave">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const KEY='egpa_inventario_v2', OLD='egpa_inventario_v1', THEME='egpa_theme';
+const NET='10.102.1.';
+const STATUSES=['Ocupado','Livre','A identificar'];
+const TYPES=['AP / Roteador','PC','PC sem nome','Impressora','Servidor','Celular','Notebook','Gateway','A identificar'];
+const FIELDS=['nome','status','tipo','setor','resp','mac','pat','desc','obs'];
+const ST={O:'Ocupado',L:'Livre',A:'A identificar'};
+
+// Formato: ip|status(O/L/A)|nome|tipo|setor|mac|descricao
+const SEED=`
+10.102.1.10|O|fwegpa.localdomain|Gateway|TI|00:02:2a:ef:6c:43|pfSense - Gateway LAN
+10.102.1.15|A||A identificar|||Testar http://10.102.1.15
+10.102.1.20|O|ARQUIVO|Impressora|Arquivo|||Print_Color
+10.102.1.21|O|COF|Impressora|COF|||Print_Color
+10.102.1.23|O|BIBLIOTECA|Impressora|Biblioteca|||Print_Mono
+10.102.1.24|O|EAD|Impressora|EAD|||Print_Mono
+10.102.1.25|O|CPOS|Impressora|CPOS|||Print_Mono
+10.102.1.26|O|GABINETE|Impressora|Gabinete|||Print_Mono
+10.102.1.27|O|CORREDOR|Impressora|Corredor|||Print_Mono
+10.102.1.28|O|IMPRESSORA_EAD|Impressora|EAD|||EAD
+10.102.1.29|O|CAGEP|Impressora|CAGEP|||Print_Mono
+10.102.1.30|O|NCI|Impressora|NCI|||Print_Mono
+10.102.1.31|O|SRCA|Impressora|SRCA|||Print_Color
+10.102.1.33|O|DIRETORIA|Impressora|Diretoria|||Print_Color
+10.102.1.40|O|PC_SALA_05|Impressora|CSOP|||Impressora CSOP
+10.102.1.52|A||A identificar|||Testar http://10.102.1.52
+10.102.1.57|A||A identificar|||Testar http://10.102.1.57
+10.102.1.66|O|PC_INFORMATICA|PC|TI|00:e0:4c:ab:d7:4a|Informática
+10.102.1.71|O|PC-AIRTON|PC|DAF|00:e0:4c:b7:36:9e|DAF-COF
+10.102.1.77|O|SAMU_WIFI|AP / Roteador|SAMU|58:d5:6e:8d:e6:4c|SAMU_TI
+10.102.1.78|O|CGP_WIFI|AP / Roteador|CGP|58:d5:6e:8d:ee:52|CGP_TI
+10.102.1.79|O|PORTARIA_WIFI|AP / Roteador|Portaria|58:d5:6e:8e:15:3c|PORTARIA_TI
+10.102.1.80|O|AP_EGPA_2_ANDAR_TI|AP / Roteador|2º Andar|58:d5:6e:8d:ab:34|ROTEADOR 2 ANDAR
+10.102.1.81|O|RECEPCAO_WIFI|AP / Roteador|Recepção|58:d5:6e:8d:dd:8f|RECEPCAO_TI
+10.102.1.82|O|DAF_WIFI|AP / Roteador|DAF|58:d5:6e:8d:9e:22|DAF_TI
+10.102.1.83|O|AP_AUDITORIO|AP / Roteador|Auditório|58:d5:6e:8d:9a:a7|ROUTER
+10.102.1.85|O|AP_ASCON|AP / Roteador|Comunicação|58:d5:6e:8f:c1:da|Comunicação (wi-fi)
+10.102.1.86|O|zabbix-Server|Servidor|TI|00:0c:29:1e:1d:c1|Servidor Zabbix
+10.102.1.87|O|WIN-K7RCMPUFNR|Servidor|TI|00:0c:29:c2:47:6c|Windows Server 2019
+10.102.1.92|O|SRCACORD-PC|PC|SRCA|00:e0:4c:b7:36:95|VANIA
+10.102.1.98|O|EDA_WIFI|AP / Roteador|EAD|58:d5:6e:8e:20:3f|EAD_TI
+10.102.1.112|O|CSOP_WIFI|AP / Roteador|CSOP|58:d5:6e:8d:db:2c|CSOP_TI
+10.102.1.113|O|egpabibliot02.egpa.local|PC|Biblioteca|f4:44:7d:3b:52:7a|Biblioteca
+10.102.1.115|A||A identificar|||Testar http://10.102.1.115
+10.102.1.116|O|bibli02.egpa.local|PC|Biblioteca|f4:44:7d:3b:51:1e|Biblioteca 02
+10.102.1.118|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.119|O|PC_DIRETOR_GAB|PC|Diretoria|00:e0:4c:ab:d6:32|Diretoria
+10.102.1.121|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.122|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.123|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.125|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.130|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.131|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.134|O|SOLANODESKTOP-N466NNQ|PC|COF|00:e0:4c:b7:35:fb|COF
+10.102.1.138|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.139|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.141|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.142|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.143|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.145|O|Galaxy-A16|Celular|||
+10.102.1.146|O|moto-g06|Celular||52:dc:d7:b4:62:06|
+10.102.1.147|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.171|O|informatica.egpa.local|PC|TI|00:e0:4c:b7:34:d4|Informática
+10.102.1.172|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.174|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.175|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.177|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.184|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.186|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.191|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.192|O|bibli06.egpa.local|PC|Biblioteca|2c:59:e5:bf:b9:0e|Biblioteca 06
+10.102.1.196|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.200|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.203|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.206|O||PC sem nome|||Placa 00:e0:4c - desktop EGPA
+10.102.1.233|O|airdeelizabeth|Notebook||40:cb:c0:d3:8c:b2|
+10.102.1.244|A||A identificar|||Testar http://10.102.1.244`;
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const todayISO=()=>new Date().toISOString().slice(0,10);
+const validIP=ip=>{const m=/^10\.102\.1\.(\d{1,3})$/.exec(ip||'');return !!m&&+m[1]>=1&&+m[1]<=254;};
+const blank=ip=>({ip,status:'Livre',nome:'',tipo:'',setor:'',mac:'',resp:'',pat:'',desc:'',obs:'',upd:''});
+
+function fromSeed(){
+  const m=new Map();
+  for(let i=1;i<=254;i++){const ip=NET+i;m.set(ip,blank(ip));}
+  SEED.trim().split('\n').forEach(line=>{
+    const [ip,st,nome,tipo,setor,mac,desc]=line.split('|').map(x=>(x??'').trim());
+    const r=m.get(ip); if(!r)return;
+    Object.assign(r,{status:ST[st]||'Livre',nome,tipo,setor,mac,desc});
+  });
+  return [...m.values()];
+}
+// Mantém apenas campos conhecidos e valores válidos vindos do armazenamento
+function pick(r){
+  const o={};
+  for(const k of ['nome','tipo','setor','mac','resp','pat','desc','obs','upd','status']){
+    if(typeof r[k]!=='string')continue;
+    if(k==='status'&&!STATUSES.includes(r[k]))continue;
+    o[k]=r[k].slice(0,500);
+  }
+  return o;
+}
+function load(){
+  const base=fromSeed(), idx=new Map(base.map(d=>[d.ip,d]));
+  try{
+    const s=localStorage.getItem(KEY)||localStorage.getItem(OLD);
+    if(s) JSON.parse(s).forEach(r=>{const t=idx.get(r.ip); if(t&&validIP(r.ip)) Object.assign(t,pick(r));});
+  }catch(e){}
+  return base;
+}
+let data=load();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data));}catch(e){alert('Não foi possível salvar no navegador.');}}
+
+// ---------- Filtros e renderização ----------
+let tab='todos', editing=null;
+function filtered(){
+  const q=$('q').value.trim().toLowerCase(), fs=$('fStatus').value, ft=$('fTipo').value;
+  return data.filter(d=>{
+    if(tab==='aps'&&d.tipo!=='AP / Roteador')return false;
+    if(tab==='imp'&&d.tipo!=='Impressora')return false;
+    if(tab==='ident'&&d.status!=='A identificar')return false;
+    if(tab==='livres'&&d.status!=='Livre')return false;
+    if(fs&&d.status!==fs)return false;
+    if(ft&&d.tipo!==ft)return false;
+    return !q||[d.ip,d.nome,d.tipo,d.mac,d.setor,d.resp,d.pat,d.desc,d.obs].join(' ').toLowerCase().includes(q);
+  });
+}
+const badge=s=>{const c=s==='Livre'?'Livre':s==='A identificar'?'A':'Ocupado';return `<span class="badge s-${c}">${esc(s.toUpperCase())}</span>`;};
+const dash=v=>esc(v)||'–';
+
+function render(){
+  const total=data.length;
+  const occ=data.filter(d=>d.status==='Ocupado').length;
+  const liv=data.filter(d=>d.status==='Livre').length;
+  const idn=data.filter(d=>d.status==='A identificar').length;
+  const pct=total?Math.round(occ/total*100):0;
+  $('cTot').textContent=total; $('cOcup').textContent=occ; $('cLivre').textContent=liv; $('cIdent').textContent=idn;
+  $('pctNum').textContent=pct+'%'; $('pct').textContent='ocupado'; $('barOcc').style.width=pct+'%';
+  const list=filtered();
+  $('count').textContent=list.length+' registros';
+  $('tbody').innerHTML=list.length?list.map(d=>`<tr class="row" data-ip="${esc(d.ip)}">
+    <td><b>${esc(d.ip)}</b></td><td>${badge(d.status)}</td><td>${dash(d.nome)}</td><td>${dash(d.tipo)}</td>
+    <td>${dash(d.mac)}</td><td>${dash(d.setor)}</td><td>${dash(d.resp)}</td><td>${dash(d.pat)}</td>
+    <td>${dash(d.upd)}</td><td>${dash(d.desc)}</td></tr>`).join('')
+    :'<tr><td colspan="10" class="muted" style="text-align:center;padding:20px">Nenhum resultado</td></tr>';
+}
+
+// ---------- Modal de edição ----------
+function openModal(ip){
+  const d=data.find(x=>x.ip===ip); if(!d)return;
+  editing=d;
+  $('mTitle').textContent='Editar '+ip;
+  $('f_ip').value=d.ip;
+  for(const k of FIELDS) $('f_'+k).value=d[k]||'';
+  $('mErr').textContent='';
+  $('modal').classList.add('open');
+}
+const closeModal=()=>$('modal').classList.remove('open');
+function normMAC(v){
+  if(!v)return '';
+  const n=v.replace(/-/g,':').toLowerCase();
+  return /^([0-9a-f]{2}:){5}[0-9a-f]{2}$/.test(n)?n:null;
+}
+function salvar(){
+  if(!editing)return;
+  const v={};
+  for(const k of FIELDS) v[k]=$('f_'+k).value.trim();
+  const mac=normMAC(v.mac);
+  if(mac===null){$('mErr').textContent='MAC inválido. Use o formato 00:11:22:33:44:55.';return;}
+  v.mac=mac;
+  Object.assign(editing,v,{upd:todayISO()});
+  save(); closeModal(); render();
+}
+function liberar(){
+  if(!editing)return;
+  if(!confirm('Liberar o IP '+editing.ip+'? Os dados deste IP serão apagados.'))return;
+  Object.assign(editing,blank(editing.ip),{upd:todayISO()});
+  save(); closeModal(); render();
+}
+
+// ---------- CSV ----------
+function csvCell(v){
+  let s=String(v??'');
+  if(/^[=+\-@\t\r]/.test(s)) s="'"+s; // evita injeção de fórmulas no Excel/LibreOffice
+  return '"'+s.replace(/"/g,'""')+'"';
+}
+function exportCSV(){
+  const head=['IP','Status','Nome','Tipo','Setor','MAC','Responsavel','Patrimonio','Observacoes','Descricao','Atualizado'];
+  const rows=filtered().map(d=>[d.ip,d.status,d.nome,d.tipo,d.setor,d.mac,d.resp,d.pat,d.obs,d.desc,d.upd].map(csvCell).join(','));
+  download('inventario-rede-egpa.csv',new Blob(['\ufeff'+head.join(',')+'\n'+rows.join('\n')],{type:'text/csv;charset=utf-8'}));
+}
+function parseCSV(text){
+  return text.replace(/^\ufeff/,'').split(/\r?\n/).filter(l=>l.trim()).map(line=>{
+    const out=[]; let c='', q=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(q){
+        if(ch==='"'&&line[i+1]==='"'){c+='"';i++;}
+        else if(ch==='"')q=false;
+        else c+=ch;
+      }else if(ch==='"')q=true;
+      else if(ch===','){out.push(c);c='';}
+      else c+=ch;
+    }
+    out.push(c);
+    return out;
+  });
+}
+$('fileIn').onchange=async e=>{
+  const f=e.target.files[0]; e.target.value=''; if(!f)return;
+  if(f.size>1024*1024){alert('Arquivo muito grande (máximo 1 MB).');return;}
+  const rows=parseCSV(await f.text());
+  const h=(rows.shift()||[]).map(x=>x.trim().toLowerCase());
+  const iIP=h.indexOf('ip');
+  if(iIP<0){alert('Coluna "IP" não encontrada no arquivo.');return;}
+  const map={status:'status',nome:'nome',tipo:'tipo',mac:'mac',setor:'setor',responsavel:'resp',patrimonio:'pat',descricao:'desc',observacoes:'obs'};
+  let n=0;
+  for(const r of rows){
+    const ip=(r[iIP]||'').trim();
+    const d=data.find(x=>x.ip===ip); if(!d||!validIP(ip))continue;
+    for(const [col,key] of Object.entries(map)){
+      const i=h.indexOf(col); if(i<0||r[i]===undefined)continue;
+      let val=r[i].replace(/^'(?=[=+\-@])/,'').trim().slice(0,500);
+      if(key==='status'&&!STATUSES.includes(val))continue;
+      if(key==='mac'){val=normMAC(val);if(val===null)continue;}
+      d[key]=val;
+    }
+    d.upd=todayISO(); n++;
+  }
+  save(); render();
+  alert(n+' registros atualizados a partir do arquivo.');
+};
+
+// ---------- Backup / restauração ----------
+function download(name,blob){
+  const url=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function backupJSON(){
+  download('backup-inventario-egpa-'+todayISO()+'.json',new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+}
+function restaurar(){
+  if(!confirm('Isto apaga TODAS as alterações salvas neste navegador. Recomendado baixar o backup antes. Continuar?'))return;
+  data=fromSeed(); save(); render();
+}
+
+// ---------- Tema ----------
+const THEME_ICON_MOON='🌙', THEME_ICON_SUN='☀️';
+function applyTheme(){
+  const t=localStorage.getItem(THEME)==='dark'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  $('themeBtn').textContent=t==='dark'?THEME_ICON_SUN+' Claro':THEME_ICON_MOON+' Escuro';
+}
+$('themeBtn').onclick=()=>{
+  const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  localStorage.setItem(THEME,next); applyTheme();
+};
+
+// ---------- Inicialização e eventos ----------
+TYPES.forEach(t=>{
+  $('fTipo').insertAdjacentHTML('beforeend',`<option>${esc(t)}</option>`);
+  $('f_tipo').insertAdjacentHTML('beforeend',`<option>${esc(t)}</option>`);
+});
+$('f_tipo').insertAdjacentHTML('afterbegin','<option value=""></option>');
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{
+  tab=b.dataset.tab;
+  document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('active',x===b));
+  render();
+});
+$('q').oninput=render; $('fStatus').onchange=render; $('fTipo').onchange=render;
+$('tbody').onclick=e=>{const tr=e.target.closest('tr[data-ip]'); if(tr)openModal(tr.dataset.ip);};
+$('bSave').onclick=salvar; $('bLib').onclick=liberar; $('bCancel').onclick=closeModal;
+$('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+$('bCsv').onclick=exportCSV; $('bBak').onclick=backupJSON; $('bRes').onclick=restaurar;
+$('bImp').onclick=()=>$('fileIn').click();
+
+applyTheme();
+save();
+render();
+</script>
+</body>
+</html>
